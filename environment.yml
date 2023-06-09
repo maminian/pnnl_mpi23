@@ -1,0 +1,15 @@
+name: pnnl_mpi23
+dependencies:
+  - python=3.10
+  - numpy=1.23.5
+  - gpy
+  - jupyterlab
+  - h5py
+  - statsmodels
+  - scikit-learn
+  - scikit-sparse
+  - joblib
+  - pip
+  - pip:
+      - spgl1
+      
