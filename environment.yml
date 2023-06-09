@@ -5,6 +5,7 @@ dependencies:
   - gpy
   - jupyterlab
   - h5py
+  - numba
   - statsmodels
   - scikit-learn
   - scikit-sparse
