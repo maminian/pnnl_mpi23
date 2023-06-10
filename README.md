@@ -2,51 +2,53 @@
 
 ## Instructions
 
-1.  Clone this repository and navigate to your local copy
+1. Clone this repository and navigate to your local copy
 
-2.  Install [Miniforge](https://github.com/conda-forge/miniforge) and
-    choose to *not* initialize Miniforge by running `conda init`. No
-    need to polute your runcom files.
-
-	For macOS and bash this looks like:
-	a.  Download the installation script and run it:
-		```
-		bash Miniforge3-MacOSX-arm64.sh
-		```
-	b.  Accept the license
-	c.  Specify an installation location
-	d.  Say *no* to `Do you wish the installer to initialize Miniforge3 by running conda init?`
+2. Install [Miniforge](https://github.com/conda-forge/miniforge) and
+   choose to *not* initialize Miniforge by running `conda init`. No
+   need to polute your runcom files. For macOS and bash this looks
+   like:
+   
+   a. Download the installation script and run it:
+      ```
+	  bash Miniforge3-MacOSX-arm64.sh
+	  ```
+	  
+   b. Accept the license
+   
+   c. Specify an installation location
+   
+   d. Say *no* to `Do you wish the installer to initialize Miniforge3 by running conda init?`
+   
 	
-3.  Initialize `conda`.
-
-	For the previous example, this looks like
-	```
-	eval "$(MINIFORGE3_INSTALL_DIR/bin/conda shell.bash hook)"
-	```
+3. Initialize `conda`. For the previous example, this looks like
+   ```
+   eval "$(MINIFORGE3_INSTALL_DIR/bin/conda shell.bash hook)"
+   ```
 	
-4.  Create the `conda-forge` environment `pnnl_mpi23`:
+4. Create the `conda-forge` environment `pnnl_mpi23`:
 
-    ```
-    conda env create -f environment.yml
-    ```
+   ```
+   conda env create -f environment.yml
+   ```
 	
-5.  Activate the `pnnl_mpi23` environment
+5. Activate the `pnnl_mpi23` environment
 
-    ```
-    conda activate pnnl_mpi23
-    ```
+   ```
+   conda activate pnnl_mpi23
+   ```
 	
-6.  Download the data file `mpi23_ens_data.h5` from the DataHub repository and place it on the `data` folder
+6. Download the data file `mpi23_ens_data.h5` from the DataHub repository and place it on the `data` folder
 
-7.  Verify the checksums
-	```
-	cd data; sha256sum -c SHA256SUMS; cd ..
-	```
+7. Verify the checksums
+   ```
+   cd data; sha256sum -c SHA256SUMS; cd ..
+   ```
 
-8.  Launch JupyterLab and start!
-    ```
-    jupyter lab
-    ```
+8. Launch JupyterLab and start!
+   ```
+   jupyter lab
+   ```
 	
 Checkout the notebook file [`notebooks/data_read_example.ipynb`](notebooks/data_read_example.ipynb) to see how to read the data and start working with it.
 
