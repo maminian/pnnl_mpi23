@@ -76,30 +76,3 @@ class DarcyExp(object):
     def residual_sens_p(self, u, p):
         # call residual(self, u, Y) before residual_sens_p(self, u, p)
         return sps.vstack([self.residual_sens_Y(u, p[:self.tpfa.geom.cells.num]), self.dLdq])
-
-
-class DarcyExpTimeDependent(DarcyExp):
-
-    def __init__(self, tpfa, ss, dt, ssv=None):
-        super().__init__(tpfa, ssv)
-        self.ss = ss
-        self.dt = dt
-        self.c = self.ss / self.dt
-        self.C = self.c * sps.eye(self.Nc)
-        self.prev_u = np.zeros(self.Nc)
-        self.c_prev_u = self.c * self.prev_u
-
-    def update_u(self, prev_u):
-        self.prev_u = prev_u
-        self.c_prev_u = self.c * self.prev_u
-
-    def solve(self, Y, q=None):
-        self.A, b = self.tpfa.ops(np.exp(Y), q)
-        return spl.spsolve(self.A - self.C, b - self.c_prev_u)
-
-    def residual(self, u, Y):
-        self.A, b = self.tpfa.ops(np.exp(Y))
-        return self.A @ u - b - self.c * (u - self.prev_u)
-
-    def residual_sens_u(self, u, Y):
-        return self.A - self.C
