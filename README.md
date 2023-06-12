@@ -38,7 +38,7 @@
    conda activate pnnl_mpi23
    ```
 	
-6. Download the data file `mpi23_ens_data.h5` from the DataHub repository and place it on the `data` folder
+6. Download the data file `mpi23_ens_data.h5` from the [Zenodo repository](https://zenodo.org/record/8027857) and place it on the `data` folder
 
 7. Verify the checksums
    ```
