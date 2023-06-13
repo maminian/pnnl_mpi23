@@ -144,10 +144,15 @@ class Attempt(torch.nn.Module):
 if __name__=="__main__":
     from matplotlib import pyplot as plt
     
+    # TODO: proper train/test validation.
+    
+    # Input: xi_ens
     Xtorch = torch.Tensor(sy.X)
+    # output: u_ens
     ytorch = torch.Tensor(sy.y)
     
     optimizer = Attempt()
+    
     
     ypred_final = optimizer.fit(
         Xtorch[:1], 
