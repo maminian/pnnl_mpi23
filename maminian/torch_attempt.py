@@ -27,7 +27,11 @@ class Attempt(torch.nn.Module):
         
         NOTHING ELSE SHOULD BE DONE HERE.
         '''
+        
         outputs = X @ self.B + self.b
+        
+        #outputs = 
+        
         return outputs
 
 
@@ -81,7 +85,7 @@ class Attempt(torch.nn.Module):
             # evaluate the actual loss.
             loss1 = criterion(y[:,ii], ypred[:,ii]) # l2 error for the prediction
             
-            loss2 = torch.linalg.norm(self.B, 1) # l1 or l2 error (regularization)
+            loss2 = torch.linalg.norm(ypred, 'fro')
             loss = loss1 + regpen*loss2
             #loss = loss1
 
@@ -158,13 +162,20 @@ if __name__=="__main__":
         Xtorch[:1], 
         ytorch[:1], 
         regpen=1e-1,
-        num_epochs = 2000, 
+        num_epochs = 1000, 
         print_every=100)
     
-    fig,ax = plt.subplots()
     
-    sy.vis(ypred_final.detach().numpy().flatten(), figax=(fig,ax))
     
-    aux_files.overlay_wells(sy.geom, ax)
+    ypred_np = ypred_final[:1].detach().numpy().flatten()
+    yexact_np = ytorch[:1].detach().numpy().flatten()
+    
+    fig,ax = sy.vis(ypred_np)
+    fig2,ax2 = sy.vis(ypred_np - yexact_np)
+    
+    
+    
+    #aux_files.overlay_wells(sy.geom, ax)
     fig.show()
+    fig2.show()
 

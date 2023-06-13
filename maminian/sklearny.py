@@ -138,6 +138,9 @@ if __name__=="__main__":
     # visualize example error
     fig2,ax2 = vis(y_pred[0] - y_test[0])
     
-    aux_files.overlay_wells(geom, ax=ax1, c='r')
-    aux_files.overlay_wells(geom, ax=ax2, c='r')
+    ax1.set(title="predicted u")
+    ax2.set(title="pointwise error")
+    
+    #aux_files.overlay_wells(geom, ax=ax1, c='r')
+    #aux_files.overlay_wells(geom, ax=ax2, c='r')
     
