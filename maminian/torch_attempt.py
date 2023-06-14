@@ -1,4 +1,6 @@
 import torch
+import torch.nn.functional as F # has ReLU in it.
+
 import numpy as np
 import aux_files # has well data.
 
@@ -25,6 +27,8 @@ class Attempt(torch.nn.Module):
         m2 = sy.dim_out        
         
         # random initialization of coefficients to be fit
+        #self.B_enc = torch.nn.Linear(sy.dim_in, d)
+        #self.B_dec = torch.nn.Linear(d, sy.dim_out)
         self.B_enc = torch.nn.Parameter(torch.rand(sy.dim_in, d)) # coefs in the linear model
         self.B_dec = torch.nn.Parameter(torch.rand(d, sy.dim_out)) # coefs in the linear model
         
@@ -41,7 +45,10 @@ class Attempt(torch.nn.Module):
         
         #outputs = X @ self.B + self.b
         
-        outputs = (X @ self.B_enc + self.b1) @ self.B_dec + self.b2
+        #outputs = (X @ self.B_enc + self.b1) @ self.B_dec + self.b2
+        
+        outputs = F.relu( X @ self.B_enc + self.b1 )
+        outputs = F.relu( outputs @ self.B_dec + self.b2 )
         
         return outputs
 
@@ -120,7 +127,8 @@ class Attempt(torch.nn.Module):
             keeploss1[epoch] = loss1.item()
             keeploss2[epoch] = loss2.item()
             #wactive[epoch] = sum(abs(self.w) > wthresh) # if using l1 regularization.
-            
+
+            # mechanisms to save the history throughout optimization            
             if (not np.isinf(keep_every)) and ((epoch) % keep_every == 0):
 
                 blah.append(
