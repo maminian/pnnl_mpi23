@@ -94,6 +94,8 @@ class Attempt(torch.nn.Module):
             ii = aux_files.iuobs
 
             # evaluate the actual loss.
+            # Weird thing -- I'm trying to swap between 
+            # error only at well locations, and error everywhere.
             if epoch%2==0:
                 loss1 = criterion(y[:,ii], ypred[:,ii]) # l2 error for the prediction
             else:
