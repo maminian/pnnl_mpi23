@@ -199,10 +199,10 @@ if __name__=="__main__":
     _ = optimizer.fit(
         Xtorch[:1000], 
         ytorch[:1000], 
-        regpen=1e-1,
+        regpen=1e0,
         num_epochs = 10000, 
         print_every=100,
-        lr=1e-2)
+        lr=1e-1)
     
     # evaluate outside training data
     another = 1001
@@ -227,7 +227,7 @@ if __name__=="__main__":
     
     #aux_files.overlay_wells(sy.geom, ax)
     
-    if True:
+    if False:
         import datetime
         tstamp = datetime.datetime.now().strftime("%d%b_%H%M")
         fname_base = "torch_results_" + tstamp

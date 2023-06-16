@@ -15,3 +15,7 @@ testing
 # Python/Jupyter
 .ipynb_checkpoints
 __pycache__
+
+# images, etc
+*.pdf
+*.png
