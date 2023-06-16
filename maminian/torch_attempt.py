@@ -6,12 +6,8 @@ import aux_files # has well data.
 
 import sklearny as sy # loads data, creates an "X" and "y"
 
-'''
-Manuch -- 
 
-This version still does a linear regression, but only on the wells.
 
-'''
 
 class Attempt(torch.nn.Module):
 
@@ -27,9 +23,7 @@ class Attempt(torch.nn.Module):
         m2 = sy.dim_out        
         
         # random initialization of coefficients to be fit
-        #self.B_enc = torch.nn.Linear(sy.dim_in, d)
-        #self.B_dec = torch.nn.Linear(d, sy.dim_out)
-        
+
         #self.activation = torch.tanh
         self.activation = torch.relu
         #self.activation = self.identity
@@ -181,8 +175,6 @@ class Attempt(torch.nn.Module):
 
 if __name__=="__main__":
     from matplotlib import pyplot as plt
-    
-    # TODO: proper train/test validation.
     
     # Input: xi_ens
     Xtorch = torch.Tensor(sy.X)
