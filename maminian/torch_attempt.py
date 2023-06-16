@@ -29,12 +29,21 @@ class Attempt(torch.nn.Module):
         # random initialization of coefficients to be fit
         #self.B_enc = torch.nn.Linear(sy.dim_in, d)
         #self.B_dec = torch.nn.Linear(d, sy.dim_out)
-        self.B_enc = torch.nn.Parameter(torch.rand(sy.dim_in, d)) # coefs in the linear model
-        self.B_dec = torch.nn.Parameter(torch.rand(d, sy.dim_out)) # coefs in the linear model
         
-        self.b1 = torch.nn.Parameter(torch.rand(1,d)) # bias/constant shift
-        self.b2 = torch.nn.Parameter(torch.rand(1, sy.dim_out))
+        #self.activation = torch.tanh
+        self.activation = torch.relu
+        #self.activation = self.identity
+        
+        self.B_enc = torch.nn.Parameter(torch.randn(sy.dim_in, d)) # coefs in the linear model
+        self.B_dec = torch.nn.Parameter(torch.randn(d, sy.dim_out)) # coefs in the linear model
+        
+        self.b1 = torch.nn.Parameter(torch.randn(1,d)) # bias/constant shift
+        self.b2 = torch.nn.Parameter(torch.randn(1, sy.dim_out))
+        #self.b3 = torch.nn.Parameter(torch.rand(1, 1))
 
+    def identity(self, thing):
+        return thing
+    
     def forward(self, X):
         '''
         What goes here: the input X, and how the output 
@@ -47,15 +56,16 @@ class Attempt(torch.nn.Module):
         
         #outputs = (X @ self.B_enc + self.b1) @ self.B_dec + self.b2
         
-        outputs = F.relu( X @ self.B_enc + self.b1 )
-        outputs = F.relu( outputs @ self.B_dec + self.b2 )
+        outputs = self.activation( X @ self.B_enc + self.b1 )
+        outputs = self.activation( outputs @ self.B_dec + self.b2 )
+        #outputs = outputs @ self.B_lin + self.b3
+        #outputs = outputs + self.b3
         
         return outputs
 
 
     def fit(self, X, y, loss='MSELoss', lr=0.1, 
-        keep_every=None, print_every=None, regpen=1e-4, num_epochs=100,
-        batchsize_min=50):
+        keep_every=None, print_every=None, regpen=1e-4, num_epochs=100):
         '''
         What goes on here: the actual training. 
         Give this THE ENTIRE DATA SET.
@@ -76,7 +86,7 @@ class Attempt(torch.nn.Module):
         # stochastic gradient descent, but this represents a class of 
         # minimization techniques based on gradient descent.
         # check torch documentation online for details.
-        optimizer = torch.optim.SGD(self.parameters(), lr=lr, momentum = 0.1, nesterov=True)
+        optimizer = torch.optim.SGD(self.parameters(), lr=lr)
 
         # if we want to track history.
         keeploss1 = np.zeros(num_epochs)
@@ -91,7 +101,6 @@ class Attempt(torch.nn.Module):
             # Clear gradients w.r.t. parameters
             optimizer.zero_grad()
 
-            # DO NOT TOUCH THESE TWO
             # TODO: possibly do batch (random subsets of wells)
             #X_wells = X[:, aux_files.iuobs]
             #yexact = y[:, aux_files.iuobs]
@@ -101,16 +110,14 @@ class Attempt(torch.nn.Module):
             ii = aux_files.iuobs
 
             # evaluate the actual loss.
-            # Weird thing -- I'm trying to swap between 
-            # error only at well locations, and error everywhere.
-            if epoch%2==0:
+            if True:
                 loss1 = criterion(y[:,ii], ypred[:,ii]) # l2 error for the prediction
             else:
                 loss1 = criterion(y, ypred) # l2 error for the prediction
                 
             
-            #loss2 = torch.linalg.norm(self.B, 1)
-            loss2 = torch.linalg.norm(self.B_enc, 1) + torch.linalg.norm(self.B_dec, 1)
+            loss2 = torch.linalg.norm(self.B_enc, 'fro') + torch.linalg.norm(self.B_dec, 'fro') # proper choices of loss ... ???
+            #loss2 = 0
             loss = loss1 + regpen*loss2
             #loss = loss1
 
@@ -121,11 +128,11 @@ class Attempt(torch.nn.Module):
             optimizer.step()
 
             if (epoch) % print_every == 0:
-                print(f'It: {epoch:.2e}. l2: {loss1:.2e}, reg: {loss2:.2e}'.format(epoch, loss1, loss2))
+                print(f'It: {epoch:.2e}. loss: {loss:.2e}'.format(epoch, loss))
 
             keeploss[epoch] = loss.item()
             keeploss1[epoch] = loss1.item()
-            keeploss2[epoch] = loss2.item()
+#            keeploss2[epoch] = loss2.item()
             #wactive[epoch] = sum(abs(self.w) > wthresh) # if using l1 regularization.
 
             # mechanisms to save the history throughout optimization            
@@ -147,7 +154,7 @@ class Attempt(torch.nn.Module):
         # at the end.
         pred = self(X)
         
-        pointwise_err = abs(ypred - y) # TODO: not saved, not outputted.
+        #pointwise_err = abs(ypred - y) # TODO: not saved, not outputted.
         
         self.history = blah
         self.keeploss = keeploss   # overall error
@@ -179,13 +186,12 @@ if __name__=="__main__":
     
     # Input: xi_ens
     Xtorch = torch.Tensor(sy.X)
-    xtorchmean = torch.mean(Xtorch, axis=0)
-    
-    Xtorch -= xtorchmean
-    
+
     # output: u_ens
     ytorch = torch.Tensor(sy.y)
-    
+
+    # TODO: normalization of data within the model.
+     
     optimizer = Attempt()
     
     # TODO: proper randomized train/test split
@@ -193,13 +199,13 @@ if __name__=="__main__":
     _ = optimizer.fit(
         Xtorch[:1000], 
         ytorch[:1000], 
-        regpen=1e-3,
-        num_epochs = 5000, 
+        regpen=1e-1,
+        num_epochs = 10000, 
         print_every=100,
-        lr=1e-3)
+        lr=1e-2)
     
     # evaluate outside training data
-    another = Xtorch.shape[0]-3
+    another = 1001
     ypred_test = optimizer(Xtorch[another])
     
     
@@ -207,17 +213,26 @@ if __name__=="__main__":
     ypred_np = ypred_test.detach().numpy().flatten()
     yexact_np = ytorch[another].detach().numpy().flatten()
     
-    fig,ax = plt.subplots(1,3, figsize=(9,3), sharex=True, sharey=True)
+    fig,ax = plt.subplots(1,3, figsize=(9,3), sharex=True, sharey=True, constrained_layout=True)
     #fig,ax = sy.vis(ypred_np)
     #fig2,ax2 = sy.vis(ypred_np - yexact_np)
     sy.vis(ypred_np, figax=(fig,ax[0]))
     sy.vis(yexact_np, figax=(fig,ax[1]))
     
     # todo - unwrap visualization into more customizable code.
-    sy.vis(ypred_np - yexact_np, figax=(fig,ax[2]))
-    
+    sy.vis( (ypred_np - yexact_np)/np.linalg.norm(yexact_np, np.inf), figax=(fig,ax[2]))
+    ax[0].set_title(r'$u_\mathrm{pred}$', loc='left', fontsize=18)
+    ax[1].set_title(r'$u_\mathrm{exact}$', loc='left', fontsize=18)
+    ax[2].set_title(r'$|u_p - u_e|/||u_e||_\infty$', loc='left', fontsize=18)
     
     #aux_files.overlay_wells(sy.geom, ax)
+    
+    if True:
+        import datetime
+        tstamp = datetime.datetime.now().strftime("%d%b_%H%M")
+        fname_base = "torch_results_" + tstamp
+        
+        fig.savefig(fname_base + ".png", bbox_inches='tight')
+        fig.savefig(fname_base + ".pdf", bbox_inches='tight')
+    
     fig.show()
-    #fig2.show()
-
