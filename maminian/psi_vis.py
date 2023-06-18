@@ -16,6 +16,16 @@ dp_base = PatchCollection(domain_patches)
 #######################################################
 
 def plot_values(myax, values, cmap=plt.cm.viridis, vmin=None, vmax=None, boundarycolor='k'):    
+    '''
+    Helper function to plot arbitrary scalar fields on the 
+    domain using arbitrary color range and colormap.
+    
+    myax: pyplot axis 
+    values: array of numericals, expected shape (1425,)
+    cmap: pyplot-compatible colormap instantiator (e.g. plt.cm.viridis)
+    vmin, vmax: scalars setting bounds for the colormap.
+    boundarycolor: pyplot-compatible color to highlight domain boundary (set to None for no boundary)
+    '''
     dp = PatchCollection(domain_patches)
     dp.set_cmap(cmap)
     dp.set_clim(vmin,vmax)
